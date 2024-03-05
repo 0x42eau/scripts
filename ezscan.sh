@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# masscan common porst to files for futher enumeration / sorting
 # ./ezscan.sh scope.file scan-rate
 # ./ezscan.sh scope.txt 4000
 
