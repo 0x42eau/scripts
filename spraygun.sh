@@ -31,11 +31,12 @@ touch ./passwords-in-queue.txt
 touch ./tmp.txt
 
 count=$(wc -l < $3)
+head -n $count $3 > tmp.txt
 
 while [ $count -gt 0 ]; do
 	echo "Starting password spray with 2x every $4"
 	
-	head -n $count $3 > tmp.txt
+	
 	
 	for pass in $(cat tmp.txt | head -2); do
 		echo "Spraying: $pass"
@@ -57,7 +58,7 @@ while [ $count -gt 0 ]; do
 	
 	sed -i "1,2d" tmp.txt
 	
-	count=$(wc -l < $3)
+	count=$(wc -l < tmp.txt)
 	echo "sleeping for $4m"
 	$sleep_timer
 done
