@@ -66,7 +66,7 @@ head -n $count $3 > passwords-in-queue.txt
 # going to try and add how many times per loop a user wants
 while [ $count -gt 0 ]; do
 
-	echo "Starting password spray with 2x every $4"
+	echo "Starting password spray with $5 passwords every $4 mins"
 	
 	# parses top two passwords from tmp.txt and sprays with netexec ; logs to spraygun-log.log	
 	for pass in $(cat passwords-in-queue.txt | head -$5); do
