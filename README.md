@@ -1,3 +1,18 @@
+ezscan-gowit.sh
+---------
+
+wrapper for output of ezscan and into gowitness for http screenshots
+
+There is a comment in ezscan that you can uncomment and autorun this after getting hosts
+
+just run it; downloads oct, 2023 gowitness binary ( was having issues with go download latest) and feeds it http hosts from ezscan
+
+./ezscan-gowit.sh
+
+![image](https://github.com/0x42eau/scripts/assets/49952735/6d980ffd-379e-438b-b384-b54c66f4e0e4)
+
+
+
 ezscan.sh
 ---------
 
