@@ -107,7 +107,7 @@ while [ $count -gt 0 ]; do
 	fi
 	
 	# sleep set up for time provided and countdown
-	echo "sleeping for $4m"
+	echo "sleeping for $4 mins"
 	echo ''
 	echo "Time until next spray (seconds): " 
 	$sleep_timer & timer
