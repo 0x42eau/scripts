@@ -31,3 +31,7 @@ cat http.hosts > gowit.hosts
 cat https.hosts >> gowit.hosts
 cat http-8000.hosts | sed 's/$/:8000/g' >> gowit.hosts
 cat http-8080.hosts | sed 's/$/:8080/g' >> gowit.hosts
+
+#if you want to auto start gowitness uncomment below
+####
+#./ezscan-gowit.sh
