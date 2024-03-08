@@ -3,6 +3,8 @@ ezscan.sh
 
 wrapper and parser from masscan, most common internal ports (heavily opnionated)
 
+masscan is the only dependency for this to work
+
 parses things like HTTP, FTP, WINRM, etc hosts into individual files. HTTP (80,443,8000,8080) will be in separate files AND into a file for gowitness
 
 ./ezscan.sh ip-list scan-rate
@@ -32,7 +34,7 @@ pipx install git+https://github.com/Pennyw0rth/NetExec
 
 --
 
-netexec is the only dependancy for this to work.
+netexec is the only dependency for this to work.
 
 ./spraygun.sh dc-ip users-file pass-file time-between-sprays passwords-per-spray
 ./spraygun.sh 10.10.10.10 users.txt passwords.txt 20 2
