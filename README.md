@@ -1,15 +1,18 @@
 ezscan.sh
+---------
 
 wrapper and parser from masscan, most common internal ports (heavily opnionated)
 
-parses things like HTTP, RDP, WINRM, etc hosts into individual files. HTTP (80,443,8000,8080) will be in separate files AND into a file for gowitness
+parses things like HTTP, FTP, WINRM, etc hosts into individual files. HTTP (80,443,8000,8080) will be in separate files AND into a file for gowitness
 
 ./ezscan.sh ip-list scan-rate
 ./ezscan.sh ips.txt 5000
 
-========================================================================
 
-Spraygun.sh
+
+
+spraygun.sh
+-----------
 
 (spraygun.py is a work in progress, but will be the same thing more or less)
 
