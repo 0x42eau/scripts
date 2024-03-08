@@ -8,7 +8,7 @@ apt install -y golang-go
 apt install -y chromium
 
 wget https://github.com/sensepost/gowitness/releases/download/2.5.1/gowitness-2.5.1-linux-amd64
-
+chmod +x gowitness-2.5.1-linux-amd64
 
 echo "using file: gowit.hosts from ezscan"
 echo ""
