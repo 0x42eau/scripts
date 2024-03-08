@@ -25,3 +25,9 @@ cat masscan.grep | grep -i '3306/tcp' | awk -F " " '{print $6}' > sql.hosts
 cat masscan.grep | grep -i '3389/tcp' | awk -F " " '{print $6}' > rdp.hosts
 cat masscan.grep | grep -i '5900/tcp' | awk -F " " '{print $6}' > vnc.hosts
 cat masscan.grep | grep -i '502/tcp' | awk -F " " '{print $6}' > modbus.hosts
+
+#for gowitness script
+cat http.hosts > gowit.hosts
+cat https.hosts >> gowit.hosts
+cat http-8000.hosts | sed 's/$/:8000/g' >> gowit.hosts
+cat http-8080.hosts | sed 's/$/:8080/g' >> gowit.hosts
