@@ -9,6 +9,9 @@ parses things like HTTP, FTP, WINRM, etc hosts into individual files. HTTP (80,4
 ./ezscan.sh ips.txt 5000
 
 
+![image](https://github.com/0x42eau/scripts/assets/49952735/fbe553ce-2a62-4f05-a984-89c4ba13c653)
+
+
 
 
 spraygun.sh
