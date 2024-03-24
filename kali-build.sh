@@ -23,7 +23,7 @@ if [ $? -eq 0 ]; then
 	#add spraygun and masscan scripts
 	git clone https://github.com/0x42eau/scripts.git /opt/scripts
 	chmod +x /opt/scripts/*
-	cp /opt/scripts/expect-pimp.exp /opt/pimpmykali/expect-pimp.exp
+	
 
 	# used autoexpect to create script, long af, so use pimp to install/update everything.
 	# after install, running expect script to just change root password and allow auto login. 
@@ -32,8 +32,7 @@ if [ $? -eq 0 ]; then
 	cd /opt/pimpmykali
 	yes n | /opt/pimpmykali/pimpmykali.sh
 	
-	
-	chmod +x /opt/pimpmykali/expect-pimp.exp
+	cp /opt/scripts/expect-pimp.exp /opt/pimpmykali/expect-pimp.exp
 	/opt/pimpmykali/expect-pimp.exp
 
 
