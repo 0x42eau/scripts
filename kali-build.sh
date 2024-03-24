@@ -3,6 +3,11 @@
 #set up script to fix kali with pimpmykali, auto put in root passwords and all the other stuff I like because I'm lazy and don't want to stare at this while it builds.
 # going to add ghidra in a bit
 
+#####
+# NEEDS TO REFERENCE -- 'EXEPCT-PIMP.EXP' -- TO AUTO PIMPMYKALI ROOT ENABLE AND PASSWORD
+# PASSWORD DEFAULTS TO TOOR, CHANGE THOSE LINES IF YOU WANT ANOTHER PASSWORD
+#####
+
 # Disable all suspend, hibernate, and sleep
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
