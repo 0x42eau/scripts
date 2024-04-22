@@ -21,6 +21,28 @@
 # $5 - passwords per
 
 
+########################
+#WORKING
+########################
+
+#IN LOCKEDOUT (needs to pair with nxc spray to create a single log per spray)
+ 	# need to only cat out latest spray
+  	# might use something like : ls -Art | tail -n 1
+   	# list -A: all except . ..; -r: reverse order; -t: by time
+    	# or 
+     	# ls -t | head -n1
+      	# LATEST_SPRAY=$(ls -t | head -n1)
+	# cat $LATEST_SPRAY | grep -ai 'LOCKED_OUT' | awk -F " " '{print $11}' | awk -F "\\" '{print $2}' | awk -F ":" '{print $1}' | sort -u > lockedout.users
+ 	# cat lockedout.users | tee -a historical-lockedout.users.bak
+  	# rm lockedout.users
+
+#IN SPRAY LOOP
+	#nxc smb $1 -u $2 -p $pass --continue-on-success --log spraygun-$pass-log.log
+ 	# LATEST_SPRAY=spraygun-$pass-log.log
+  	# outside of loop for global var, which is needed as latest file to parse with lockedout users
+   	# below is responding to the second most recent file, which should be the spray-$pass-log.log and putting in global var for lockedout.users
+  	# LATEST_SPRAY=$(ls -t | sed -n '2p')
+
 ##########################################
 #### checking for args
 ##########################################
@@ -158,7 +180,8 @@ while [ $count -gt 0 ]; do
 ##########################################
 #### LOCKOUT
 ##########################################
-	
+
+
 	cat spraygun-log.log | grep -ai 'LOCKED_OUT' | awk -F " " '{print $11}' | awk -F "\\" '{print $2}' | awk -F ":" '{print $1}' | sort -u > lockedout.users
 	# sed delete for lockedout.users cmp lockedout.users.bak
 	lockedout_count=$(wc -l < lockedout.users)
