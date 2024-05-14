@@ -50,9 +50,9 @@ sleep 3s
 ########################
 mkdir /opt/triaxiOSINT/
 cd /opt/triaxiOSINT/
-mkdir scans dns-stuff logs_and_data formatted_notes
+mkdir scans dns-stuff logs_and_data formatted_notes formatted_notes/goofuzz-docs
 cd /opt/triaxiOSINT/scans/
-mkdir masscan nmap unicorn naabu gowitness cloud_enum nikto goofuzz
+mkdir masscan nmap unicorn naabu gowitness cloud_enum nikto goofuzz goofuzz/docs
 cd /opt/triaxiOSINT/dns-stuff
 mkdir amass harvester crtsh sublist3r dig nslookup
 cd /opt/triaxiOSINT/
@@ -72,7 +72,7 @@ chmod +x /opt/triaxiOSINT/scans/gowitness/gowitness-2.5.1-linux-amd64
 
 # goofuzz
 git clone https://github.com/m3n0sd0n4ld/GooFuzz.git /opt/triaxiOSINT/scans/goofuzz
-chmod +x /opt/triaxiOSINT/goofuzz/GooFuzz
+chmod +x /opt/triaxiOSINT/scans/goofuzz/GooFuzz
 
 #naabu
 apt install -y libpcap-dev
@@ -83,11 +83,23 @@ apt install naabu
 git clone https://github.com/initstring/cloud_enum.git /opt/triaxiOSINT/scans/cloud_enum
 pip3 install -r /opt/triaxiOSINT/scans/cloud_enum/requirements.txt
 
-
+echo ""
+echo ""
+echo '*********************************'
+echo ""
+echo ""
+echo "Done installing everything"
+echo "Let's get this bread"
+echo ""
+echo ""
+echo '*********************************'
+echo ""
+echo ""
 sleep 2s
 
 ########################
 #logger
+# making a all.log file to keep date/time and commands
 ########################
 logger()
 {
@@ -103,6 +115,11 @@ echo ""
 echo '*********************************'
 echo ""
 echo ""
+# add spacing to log file for readability
+echo "" >> /opt/triaxiOSINT/logs_and_data/all.log
+echo "===========================" >> /opt/triaxiOSINT/logs_and_data/all.log
+echo "" >> /opt/triaxiOSINT/logs_and_data/all.log
+
 sleep 5s
 "$1"
 
@@ -110,10 +127,15 @@ sleep 5s
 
 ########################
 #masscan
+# --ttl  | time to live
+# -p  | ports / U:udp
+# --rate  | how fast in bytes
+# -iL  | import file
+# -oB  | output file in masscan binary
 ########################
 masscan_scan()
 {
-echo 'masscan --ttl 62 -p1-65535,U:1-65535 --rate 5000 -iL $ips_file -oB /opt/triaxiOSINT/scans/masscan/masscan.mass' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
+echo 'masscan --ttl 62 -p1-65535,U:1-65535 --rate 2000 -iL $ips_file -oB /opt/triaxiOSINT/scans/masscan/masscan.mass' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 masscan --ttl 62 -p1-65535,U:1-65535 --rate 2000 -iL $ips_file -oB /opt/triaxiOSINT/scans/masscan/masscan.mass
 masscan --readscan /opt/triaxiOSINT/scans/masscan/masscan.mass > /opt/triaxiOSINT/scans/masscan/masscan.grep
 
@@ -176,8 +198,6 @@ cat /opt/triaxiOSINT/scans/unicorn/portscan* | grep -i open | awk -F " " '{print
 ########################
 naabu_scan()
 {
-echo 'naabu -p - $domain -v -o /opt/triaxiOSINT/scans/naabu/naabu.domain.scan' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
-naabu -p - $domain -v -o /opt/triaxiOSINT/scans/naabu/naabu.domain.scan
 echo 'naabu -p - -l $ips_file -v -o /opt/triaxiOSINT/scans/naabu/naabu.ips.scan' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 naabu -p - -l $ips_file -v -o /opt/triaxiOSINT/scans/naabu/naabu.ips.scan
 cat /opt/triaxiOSINT/scans/naabu/naabu.ips.scan | awk -F ":" '{print $2}' | sort -u > /opt/triaxiOSINT/scans/naabu/naabu.ports
@@ -201,8 +221,8 @@ cat /opt/triaxiOSINT/scans/naabu/naabu.domain.scan | awk -F ":" '{print $2}' | s
 ########################
 nmap_fast()
 {
-echo 'nmap -F -sV -Pn -n -T2 -f --data-length 12 --randomize-hosts --ttl 57 --stats-every 120s -iL $ips_file -oA /opt/triaxiOSINT/scans/nmap/fast-nmap' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
-nmap -F -sV -Pn -n -T2 -f --data-length 12 --randomize-hosts --ttl 57 --stats-every 120s -iL $ips_file -oA /opt/triaxiOSINT/scans/nmap/fast-nmap
+echo 'nmap -F -sV -Pn -n -T2 -f --data-length 12 --randomize-hosts --ttl 57 --stats-every 60s -iL $ips_file -oA /opt/triaxiOSINT/scans/nmap/fast-nmap' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
+nmap -F -sV -Pn -n -T2 -f --data-length 12 --randomize-hosts --ttl 57 --stats-every 60s -iL $ips_file -oA /opt/triaxiOSINT/scans/nmap/fast-nmap
 #cat /opt/triaxiOSINT/scans/nmap/fast-nmap.gnmap 
 }
 
@@ -215,17 +235,17 @@ nmap -F -sV -Pn -n -T2 -f --data-length 12 --randomize-hosts --ttl 57 --stats-ev
 # -vv  | verbose verbose
 # -iL  | input file
 # -oA  | output files
-# assigned var "ports_for_nmap" for ease of use
+# puts ports into tmp file, then replaces \r\n with , for nmaps
 ########################
 nmap_version_scan()
 {
-echo 'nmap -p$(cat /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.txt) -sV -sC -vv --stats-every 120s -iL $ips_file -oA /opt/triaxiOSINT/scans/nmap/nmap-versions-scans --source-port 53' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
+echo 'nmap -p$(cat /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.txt) -sV -sC -vv --stats-every 60s -iL $ips_file -oA /opt/triaxiOSINT/scans/nmap/nmap-versions-scans --source-port 53' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 cat /opt/triaxiOSINT/scans/nmap/fast-nmap.xml | grep -i portid | awk -F " " '{print $3}' | awk -F '"' '{print $2}' | sort -u >> /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.tmp
 cat /opt/triaxiOSINT/scans/masscan/masscan.ports >> /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.tmp
 cat /opt/triaxiOSINT/scans/unicorn/unicorn.ports  >> /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.tmp
 cat /opt/triaxiOSINT/scans/naabu/naabu.ports >> /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.tmp
 sort -u /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.tmp | tr -d '\r' | tr '\n' ',' > /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.txt
-nmap -p$(cat /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.txt) -sV -sC -vv --stats-every 120s -iL $ips_file -oA /opt/triaxiOSINT/scans/nmap/nmap-versions-scans --source-port 53
+nmap -p$(cat /opt/triaxiOSINT/scans/nmap/ports_for_version_scan.txt) -sV -sC -vv --stats-every 60s -iL $ips_file -oA /opt/triaxiOSINT/scans/nmap/nmap-versions-scans --source-port 53
 }
 
 
@@ -242,7 +262,7 @@ echo '/opt/triaxiOSINT/scans/gowitness/gowitness-2.5.1-linux-amd64 file -f /opt/
 
 /opt/triaxiOSINT/scans/gowitness/gowitness-2.5.1-linux-amd64 file -f /opt/triaxiOSINT/scans/gowitness/gowit.hosts -P /opt/triaxiOSINT/scans/gowitness/screenshots
 
-/opt/triaxiOSINT/gowitness/gowitness-2.5.1-linux-amd64 server & 
+/opt/triaxiOSINT/scans/gowitness/gowitness-2.5.1-linux-amd64 server & 
 echo "gowitness server is on localhost:7171"
 }
 
@@ -255,7 +275,7 @@ harvester_scan()
 {
 echo 'theHarvester -d $domain -b all | tee -a /opt/triaxiOSINT/dns-stuff/harvester/harvester.log' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 theHarvester -d $domain -b all | tee -a /opt/triaxiOSINT/dns-stuff/harvester/harvester.log
-cat /opt/triaxiOSINT/dns-stuff/harvester/harvester.log | grep -iE ":[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | sed -e 's/:/ : /g' > /opt/triaxiOSINT/formatted_notes/harvester.parsed
+cat /opt/triaxiOSINT/dns-stuff/harvester/harvester.log | grep -iE ":[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | sed -e 's/:/ : /g' > /opt/triaxiOSINT/dns-stuff/harvester/harvester.parsed
 # needs to be checked against $scope
 }
 
@@ -286,7 +306,7 @@ if ps -p $amass_pid > /dev/null; then
 	kill $amass_pid
 	echo "Amass timed out and was murdered"
 fi
-cat /opt/triaxiOSINT/dns-stuff/amass/amass.log | grep -i ipaddress --color=never | grep -iv netblock --color=never | awk -F "-->" '{print $1,$3}' | sed -e 's/(FQDN)//g' | awk '{ print $1 " : " $5 }' > /opt/triaxiOSINT/formatted_notes/amass.parsed
+cat /opt/triaxiOSINT/dns-stuff/amass/amass.log | grep -i ipaddress --color=never | grep -iv netblock --color=never | awk -F "-->" '{print $1,$3}' | sed -e 's/(FQDN)//g' | awk '{ print $1 " : " $5 }' > /opt/triaxiOSINT/dns-stuff/amass/amass.parsed
 }
 
 ########################
@@ -298,7 +318,7 @@ sublist3r_scan()
 {
 echo 'sublist3r -n -d $domain | tee -a /opt/triaxiOSINT/dns-stuff/sublist3r/sublist3r.log' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 sublist3r -n -d $domain | tee -a /opt/triaxiOSINT/dns-stuff/sublist3r/sublist3r.log
-cat /opt/triaxiOSINT/dns-stuff/sublist3r/sublist3r.log | sort -u > /opt/triaxiOSINT/formatted_notes/sublist3r.parsed
+cat /opt/triaxiOSINT/dns-stuff/sublist3r/sublist3r.log | sort -u > /opt/triaxiOSINT/dns-stuff/sublist3r/sublist3r.parsed
 }
 
 ########################
@@ -321,7 +341,7 @@ grep -ai $domain /opt/triaxiOSINT/dns-stuff/crtsh/crt-sh.log | sed 's/<TD>//g' |
 dig_scan()
 {
 echo 'dig $domain | tee -a dig.log' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
-dig $domain | tee -a dig.log
+dig $domain | tee -a /opt/triaxiOSINT/dns-stuff/dig/dig.log
 dig $domain | grep -i $domain | grep -iv ';' | awk -F " " '{print $1,$4,$5}' > /opt/triaxiOSINT/dns-stuff/dig/dig.parsed
 }
 
@@ -332,6 +352,8 @@ nslookup_scan()
 {
 echo 'nslookup $domain > /opt/triaxiOSINT/dns-stuff/nslookup/nslookup.log' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 nslookup $domain | tee -a /opt/triaxiOSINT/dns-stuff/nslookup/nslookup.log
+for i in $(cat /opt/triaxiOSINT/dns-stuff/crtsh/crtsh.domains); do nslookup $i | tee -a /opt/triaxiOSINT/dns-stuff/nslookup/nslookup-crtsh.domains; done
+cat /opt/triaxiOSINT/dns-stuff/nslookup/nslookup-subdomains.log| grep -i address -B1 | grep -i $domain -A 1 > /opt/triaxiOSINT/dns-stuff/nslookup/nslookup.parsed
 }
 
 ########################
@@ -351,15 +373,15 @@ python3 /opt/triaxiOSINT/scans/cloud_enum/cloud_enum.py -k $domain -l /opt/triax
 ########################
 #goofuzz
 # https://github.com/m3n0sd0n4ld/GooFuzz
-#
-#
+# just goofuzzing for docs
+# downloads docs and copies to log folder
 #
 ########################
 goofuzz_scan()
 {
 echo '/opt/triaxiOSINT/scans/goofuzz/GooFuzz -t $domain -e pdf,doc,bak,txt,xls,ppt,config,bk,old,git -o /opt/triaxiOSINT/scans/goofuzz/goofuzz.results' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 /opt/triaxiOSINT/scans/goofuzz/GooFuzz -t $domain -e pdf,doc,bak,txt,xls,ppt,config,bk,old,git -o /opt/triaxiOSINT/scans/goofuzz/goofuzz.results
-
+for i in $(cat /opt/triaxiOSINT/scans/goofuzz/goofuzz.results); do wget $i -O /opt/triaxiOSINT/scans/goofuzz/docs/$i; done
 }
 
 
@@ -374,7 +396,19 @@ echo 'nikto -host $domain -followredirects -p 443 | tee -a /opt/triaxiOSINT/scan
 nikto -host $domain -followredirects -p 443 | tee -a /opt/triaxiOSINT/scans/nikto/nikto-443.log
 }
 
-
+########################
+#parse me for onenote
+# essentially pulls all the parse logs for one note
+# also pulls ports/versions to copy and paste
+########################
+one_note()
+{
+find /opt/triaxiOSINT/ -type f -name "*.parsed" > /opt/triaxiOSINT/formatted_notes/parsed.files
+#for i in $(cat /opt/triaxiOSINT/formatted_notes/parsed.files); do cat $i| grep -i ":" | tee -a /opt/triaxiOSINT/formatted_notes/OSINT-dns.plex; done
+# need to parse nslookup into fancy, then unique for plex
+cp /opt/triaxiOSINT/scans/nmap/nmap-versions-scans.nmap  >> /opt/triaxiOSINT/formatted_notes/nmap-version.txt
+cp /opt/triaxiOSINT/scans/goofuzz/docs/* /opt/triaxiOSINT/formatted_notes/goofuzz-docs
+}
 
 ########################
 # actual running code
@@ -382,18 +416,19 @@ nikto -host $domain -followredirects -p 443 | tee -a /opt/triaxiOSINT/scans/nikt
 # comment things out to "turn off" the function you don't want. e.g. turn off nikto = #logger nikto_scan
 ########################
 logger dig_scan
+logger crt_sh_scan
+logger nslookup_scan
 logger sublist3r_scan
 logger harvester_scan
-logger nslookup_scan
+logger goofuzz_scan
 logger masscan_scan
 logger unicorn_scan
 logger naabu_scan
 logger nmap_fast
 logger nmap_version_scan
 logger gowit_scan
-logger goofuzz_scan
 logger cloud_enum_scan
-logger nikto_scan
+#logger nikto_scan #kept hanging 
 logger amass_scan # moved this dipshit down here so it doesn't break everything
 
 echo "all donesies :)"
