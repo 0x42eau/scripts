@@ -342,7 +342,7 @@ dig_scan()
 {
 echo 'dig $domain | tee -a dig.log' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 dig $domain | tee -a /opt/triaxiOSINT/dns-stuff/dig/dig.log
-dig $domain | grep -i $domain | grep -iv ';' | awk -F " " '{print $1,$4,$5}' > /opt/triaxiOSINT/dns-stuff/dig/dig.parsed
+cat /opt/triaxiOSINT/dns-stuff/dig/dig.log | grep -i $domain | grep -iv ';' | awk -F " " '{print $1,$4,$5}' | sed 's/ A / : /g' > /opt/triaxiOSINT/dns-stuff/dig/dig.parsed
 }
 
 ########################
@@ -353,7 +353,7 @@ nslookup_scan()
 echo 'nslookup $domain > /opt/triaxiOSINT/dns-stuff/nslookup/nslookup.log' | tee -a /opt/triaxiOSINT/logs_and_data/all.log
 nslookup $domain | tee -a /opt/triaxiOSINT/dns-stuff/nslookup/nslookup.log
 for i in $(cat /opt/triaxiOSINT/dns-stuff/crtsh/crtsh.domains); do nslookup $i | tee -a /opt/triaxiOSINT/dns-stuff/nslookup/nslookup-crtsh.domains; done
-cat /opt/triaxiOSINT/dns-stuff/nslookup/nslookup-subdomains.log| grep -i address -B1 | grep -i $domain -A 1 > /opt/triaxiOSINT/dns-stuff/nslookup/nslookup.parsed
+cat nslookup-crtsh.domains | grep -iE 'name|address' | grep -iv '#53'| sed ':a;N;$!ba;s/\nAddress: / : /g' | sed 's/Name:[[:space:]]*//' > /opt/triaxiOSINT/dns-stuff/nslookup/nslookup.parsed
 }
 
 ########################
@@ -403,10 +403,11 @@ nikto -host $domain -followredirects -p 443 | tee -a /opt/triaxiOSINT/scans/nikt
 ########################
 one_note()
 {
-find /opt/triaxiOSINT/ -type f -name "*.parsed" > /opt/triaxiOSINT/formatted_notes/parsed.files
-#for i in $(cat /opt/triaxiOSINT/formatted_notes/parsed.files); do cat $i| grep -i ":" | tee -a /opt/triaxiOSINT/formatted_notes/OSINT-dns.plex; done
-# need to parse nslookup into fancy, then unique for plex
-cp /opt/triaxiOSINT/scans/nmap/nmap-versions-scans.nmap  >> /opt/triaxiOSINT/formatted_notes/nmap-version.txt
+#find /opt/triaxiOSINT/ -type f -name "*.parsed" > /opt/triaxiOSINT/formatted_notes/parsed.files  << testing for lazy format
+cp /opt/triaxiOSINT/dns-stuff/harvester/harvester.parsed /opt/triaxiOSINT/formatted_notes/harvester.txt
+cp /opt/triaxiOSINT/dns-stuff/nslookup/nslookup.parsed /opt/triaxiOSINT/formatted_notes/nslookup.txt
+cp /opt/triaxiOSINT/dns-stuff/dig/dig.parsed  /opt/triaxiOSINT/formatted_notes/dig.txt
+cp /opt/triaxiOSINT/scans/nmap/nmap-versions-scans.nmap /opt/triaxiOSINT/formatted_notes/nmap-version.txt
 cp /opt/triaxiOSINT/scans/goofuzz/docs/* /opt/triaxiOSINT/formatted_notes/goofuzz-docs
 }
 
@@ -419,7 +420,9 @@ logger dig_scan
 logger crt_sh_scan
 logger nslookup_scan
 logger sublist3r_scan
+sleep 10s # too fast
 logger harvester_scan
+sleep 10s # too fast
 logger goofuzz_scan
 logger masscan_scan
 logger unicorn_scan
@@ -430,7 +433,11 @@ logger gowit_scan
 logger cloud_enum_scan
 #logger nikto_scan #kept hanging 
 logger amass_scan # moved this dipshit down here so it doesn't break everything
+logger one_note
 
 echo "all donesies :)"
 echo "gowitness server is on localhost:7171"
 
+
+
+## add trufflehog
