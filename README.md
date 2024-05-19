@@ -56,3 +56,10 @@ netexec is the only dependency for this to work.
 
 ![image](https://github.com/0x42eau/scripts/assets/49952735/ce002d74-896c-4770-9f34-39dbcafe76a7)
 
+external_scan.sh
+-----------
+Incorporates many o' tool for automated scanning. Built to be module to add functions and turn on/off features in the script.
+Uses : dig, crtsh, nslookup, sublist3r, harvester, amass, goofuzz, masscan, unicornscan, naabu, nmap -F(ast), nmap -sV, gowitness, cloud_enum, nikto, and parsing for notes.
+-d domain
+-t targets file
+
