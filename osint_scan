@@ -83,6 +83,10 @@ apt install naabu
 git clone https://github.com/initstring/cloud_enum.git /opt/osint_scan/scans/cloud_enum
 pip3 install -r /opt/osint_scan/scans/cloud_enum/requirements.txt
 
+
+#trufflehog
+curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+
 echo ""
 echo ""
 echo '*********************************'
@@ -400,7 +404,23 @@ nikto -host $domain -followredirects -p 443 | tee -a /opt/osint_scan/scans/nikto
 }
 
 ########################
-#parse me for onenote
+# uses trufflehog to hunt for CI/CD creds
+# https://github.com/trufflesecurity/trufflehog
+
+########################
+trufflehog_scan()
+{
+echo 'trufflehog github --org=$truffle_domain --only-verified' | tee -a /opt/osint_scan/logs_and_data/all.log
+truffle_domain=`$domain | awk -F '.' '{print $1}'`
+trufflehog github --org=$truffle_domain --only-verified
+echo ""
+sleep 4s
+echo ""
+echo "this ran with $truffle_domain, consider more OSINT to find org dev pipelines and rerun with -- trufflehog githup --org=orgname_in_github --only-verified"
+}
+
+########################
+#parse me for like one of your french girls
 # essentially pulls all the parse logs for one note
 # also pulls ports/versions to copy and paste
 ########################
@@ -434,6 +454,7 @@ logger nmap_fast
 logger nmap_version_scan
 logger gowit_scan
 logger cloud_enum_scan
+logger truffle_scan
 #logger nikto_scan #kept hanging 
 logger amass_scan # moved this dipshit down here so it doesn't break everything
 logger one_note
