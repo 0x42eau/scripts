@@ -16,4 +16,4 @@ echo '#!/bin/bash' >> /opt/brave
 echo 'brave-browser --no-sandbox &>/dev/null &' >> /opt/brave
 chmod +x /opt/brave
 #start brave
-brave
+#brave
