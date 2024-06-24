@@ -3,7 +3,7 @@
 apt update && apt upgrade -y
 
 # install vmware tools 
-sudo apt-get install open-vm-tools -y
+sudo apt-get install open-vm-tools git -y
 
 # add vmware shared folders 
 # MY ENV/PREFS ONLY
@@ -49,13 +49,13 @@ fi
 echo '###################'
 echo '[*] Downloading and running pimpmykali, for'
 echo '###################'
-git clone https://github.com/Dewalt-arch/pimpmykali.git /opt
+git clone https://github.com/Dewalt-arch/pimpmykali.git /opt/pimpmykali
 echo "N" | /opt/pimpmykali/pimpmykali.sh
 
 echo '###################'
 echo '[*] grabbing my scripts and putting into /opt'
 echo '###################'
-git clone https://github.com/0x42eau/scripts.git /opt
+git clone https://github.com/0x42eau/scripts.git /opt/scripts
 
 chmod +x /opt/scripts/*
 
@@ -67,12 +67,12 @@ echo '###################'
 echo '###################'
 echo '[*] mapping pi-hole for dns'
 echo '###################'
-/opt/add-pihole-nameserver.sh
+/opt/scripts/add-pihole-nameserver.sh
 
 echo '###################'
 echo '[*] installing brave'
 echo '###################'
-/opt/install_brave.sh
+/opt/scripts/install_brave.sh
 
 
 echo '###################'
