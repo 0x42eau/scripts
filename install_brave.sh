@@ -11,7 +11,10 @@ sudo apt install brave-browser -y
 ########################################################################
 
 #make "brave" open vs brave-browser
-export PATH=$PATH:/opt
+echo "adding 'brave' to path"
+me=$(whoami)
+echo "" >> /home/$me/.bashrc
+echo "export PATH=$PATH:/opt" >> /home/$me/.bashrc
 echo '#!/bin/bash' >> /opt/brave
 echo 'brave-browser --no-sandbox &>/dev/null &' >> /opt/brave
 chmod +x /opt/brave
