@@ -16,7 +16,7 @@ me=$(whoami)
 echo "" >> /home/$me/.bashrc
 echo "export PATH=$PATH:/opt" >> /home/$me/.bashrc
 sudo /bin/bash -c 'echo "#!/bin/bash" > /opt/brave '
-sudo /bin/bach -c  'echo "brave-browser --no-sandbox &>/dev/null &" >> /opt/brave'
+sudo /bin/bash -c  'echo "brave-browser --no-sandbox &>/dev/null &" >> /opt/brave'
 sudo chmod +x /opt/brave
 #start brave
 #brave
