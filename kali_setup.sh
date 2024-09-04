@@ -45,6 +45,54 @@ if mount -t fuse.vmhgfs-fuse .host:/ $MOUNT_POINT -o allow_other; then
     exit 0
 fi
 
+#stolen from https://github.com/mttaggart/pwst-resources/blob/main/kali-setup/setup.sh
+# Add Brave Browser Sources
+# Brave Browser
+echo '###################'
+echo "Setting up Brave sources"
+echo '###################'
+curl -s https://brave-browser-apt-release.s3.brave.com/brave-core.asc | sudo apt-key --keyring /etc/apt/trusted.gpg.d/brave-browser-release.gpg add -
+
+echo "deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+
+# Update and add necessary packages
+echo '###################'
+echo "Installing Packages"
+echo '###################'
+sudo apt update
+sudo apt install -y fish terminator gedit python3-pip brave-browser vim-gtk3 zaproxy
+
+# Install VSCode
+echo '###################'
+echo "Installing VSCode"
+echo '###################'
+curl -L "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64" -o code.deb
+sudo dpkg -i code.deb
+rm code.deb
+
+# Setup fonts
+mkdir ~/Scripts
+cd ~/Scripts
+git clone https://github.com/danielmiessler/SecLists
+git clone https://github.com/powerline/fonts
+cd fonts
+chmod +x install.sh
+./install.sh
+cd ~
+
+
+# Setup Shell
+curl -kL https://get.oh-my.fish | fish
+fish -c "omf install bobthefish && exit"
+echo "set -x PATH \$PATH $HOME/.cargo/bin" >> ~/.config/fish/config.fish
+echo "Setup is complete! If you wish to use fish, run:\nchsh -s /usr/bin/fish"
+
+# Setup Rust and Rust tools
+echo "Installing Rust and Rust tools"
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+~/.cargo/bin/cargo install rustscan
+~/.cargo/bin/cargo install feroxbuster
+
 # option "N" for new install, no make root login
 echo '###################'
 echo '[*] Downloading and running pimpmykali, for'
@@ -80,3 +128,22 @@ echo '[*] Running pimpmykali again to set up root account'
 echo '###################'
 sleep 5s
 /opt/pimpmykali/pimpmykali.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Setup Terminator
+mkdir ~/.config/terminator
+cp ./terminatorconfig ~/.config/terminator/config
+
+
