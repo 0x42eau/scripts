@@ -4,7 +4,7 @@
 # ./ezscan.sh scope.file scan-rate
 # ./ezscan.sh scope.txt 4000
 
-masscan -p21,22,23,25,53,80,88,110,111,135-139,143,389,443,445,502,636,993,995,1433,1434,1723,3306,3389,5900,5985,5986,8000,8080,8443 -iL $1 --rate $2 -oB masscan.mass
+masscan -p21,22,23,25,53,80,88,110,111,135-139,143,161,389,443,445,502,515,636,993,995,1433,1434,1723,3306,3389,5900,5985,5986,8000,8080,8443,9100 -iL $1 --rate $2 -oB masscan.mass
 
 masscan --open --readscan masscan.mass > masscan.grep
 
