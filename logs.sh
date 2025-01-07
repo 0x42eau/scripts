@@ -15,6 +15,15 @@
 # disable to be a dork
 # disable_command_logging
 
+#################################################
+## copy below to .sh file and run
+#################################################
+## #!/bin/bash
+
+##cp logger.sh /usr/local/bin/logger.sh
+## chmod 755 /usr/local/bin/logger.sh
+## source /usr/local/bin/logger.sh
+## show_log_status
 
 # Configuration variables
 LOG_FILE="/home/kali/command_history.log"  # Changed to Kali home directory
