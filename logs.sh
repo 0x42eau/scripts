@@ -20,10 +20,19 @@
 #################################################
 ## #!/bin/bash
 
-##cp logger.sh /usr/local/bin/logger.sh
-## chmod 755 /usr/local/bin/logger.sh
+## cp logger.sh /usr/local/bin/logger.sh
+## chmod 666 /usr/local/bin/logger.sh
 ## source /usr/local/bin/logger.sh
 ## show_log_status
+## chown :kali /home/kali/command_history.log
+
+
+# run sed to fix if want or just delete the pound/hashes
+# sed -i 's/\#\# //g' script.sh
+
+#################################################
+## actual script below
+#################################################
 
 # Configuration variables
 LOG_FILE="/home/kali/command_history.log"  # Changed to Kali home directory
@@ -56,7 +65,7 @@ rotate_logs() {
         done
         mv "$LOG_FILE" "${LOG_FILE}.1"
         touch "$LOG_FILE"
-        chmod 600 "$LOG_FILE"  # Changed to more secure permissions
+        chmod 666 "$LOG_FILE"  # Changed to more secure permissions
     fi
 }
 
@@ -72,7 +81,7 @@ safe_log_write() {
     # Create log file if it doesn't exist
     if [ ! -f "$LOG_FILE" ]; then
         touch "$LOG_FILE"
-        chmod 600 "$LOG_FILE"  # Changed to more secure permissions
+        chmod 666 "$LOG_FILE"  # Changed to more secure permissions
     fi
     
     # Check disk space
