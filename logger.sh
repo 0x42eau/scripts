@@ -2,12 +2,6 @@
 
 # logs in /home/kali/command_history.log
 
-# usage
-# cp logger.sh /usr/local/bin/logger.sh
-# chmod 755 /usr/local/bin/logger.sh
-# source /usr/local/bin/logger.sh
-# check if working:
-# show_log_status
 
 # try to enable if broken:
 # enable_command_logging
@@ -18,21 +12,20 @@
 #################################################
 ## copy below to .sh file and run
 #################################################
-## #!/bin/bash
+:'
 
-## cp logger.sh /usr/local/bin/logger.sh
-## chmod 666 /usr/local/bin/logger.sh
-## source /usr/local/bin/logger.sh
-## show_log_status
-## chown :kali /home/kali/command_history.log
+#!/bin/bash
+cp logger.sh /usr/local/bin/logger.sh
+chmod 666 /usr/local/bin/logger.sh
+echo "source /usr/local/bin/logger.sh" >> /root/.zshrc
+echo "source /usr/local/bin/logger.sh" >> /root/.bashrc
+echo "source /usr/local/bin/logger.sh" >> /home/kali/.zshrc
+echo "source /usr/local/bin/logger.sh" >> /home/kali/.bashrc
+chown :kali /home/kali/command_history.log
+chmod 666 /home/kali/command_history.log
+source /usr/local/bin/logger.sh
 
-
-# run sed to fix if want or just delete the pound/hashes
-# sed -i 's/\#\# //g' script.sh
-
-#################################################
-## actual script below
-#################################################
+'
 
 # Configuration variables
 LOG_FILE="/home/kali/command_history.log"  # Changed to Kali home directory
@@ -65,7 +58,7 @@ rotate_logs() {
         done
         mv "$LOG_FILE" "${LOG_FILE}.1"
         touch "$LOG_FILE"
-        chmod 666 "$LOG_FILE"  # Changed to more secure permissions
+        chmod 600 "$LOG_FILE"  # Changed to more secure permissions
     fi
 }
 
@@ -81,7 +74,7 @@ safe_log_write() {
     # Create log file if it doesn't exist
     if [ ! -f "$LOG_FILE" ]; then
         touch "$LOG_FILE"
-        chmod 666 "$LOG_FILE"  # Changed to more secure permissions
+        chmod 600 "$LOG_FILE"  # Changed to more secure permissions
     fi
     
     # Check disk space
