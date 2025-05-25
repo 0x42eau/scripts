@@ -331,7 +331,7 @@ cat /opt/osint_scan/dns-stuff/sublist3r/sublist3r.log | sort -u > /opt/osint_sca
 #crt.sh
 #https://crt.sh/
 # curl crtsh for specified domain, parses for subdomains
-# curl -s https://crt.sh/\?q\=$domain\&output\=json | jq .
+# curl -s https://crt.sh/\?q\=inlanefreight.com\&output\=json | jq -r '.[] | [.common_name] + (.name_value | split("\n")) | .[]' | sort -u
 ########################
 crt_sh_scan()
 {
