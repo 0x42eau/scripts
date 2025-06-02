@@ -331,14 +331,16 @@ cat /opt/osint_scan/dns-stuff/sublist3r/sublist3r.log | sort -u > /opt/osint_sca
 #crt.sh
 #https://crt.sh/
 # curl crtsh for specified domain, parses for subdomains
+#old
+#curl https://crt.sh/?q="$domain" | tee /opt/osint_scan/dns-stuff/crtsh/crt-sh.log
 # curl -s https://crt.sh/\?q\=inlanefreight.com\&output\=json | jq -r '.[] | [.common_name] + (.name_value | split("\n")) | .[]' | sort -u
 ########################
 crt_sh_scan()
 {
-echo 'curl https://crt.sh/?q="$domain" | tee /opt/osint_scan/dns-stuff/crtsh/crt-sh.log' | tee -a /opt/osint_scan/logs_and_data/all.log
-curl https://crt.sh/?q="$domain" | tee /opt/osint_scan/dns-stuff/crtsh/crt-sh.log
-grep -ai $domain /opt/osint_scan/dns-stuff/crtsh/crt-sh.log | sed 's/<TD>//g' | sed 's/<\/TD>//g' | sed 's/<BR>/\r\n/g' | grep -ivE 'href|search|title' | sed 's/^ *//g' | sort -u > /opt/osint_scan/dns-stuff/crtsh/crtsh.domains
-grep -ai $domain /opt/osint_scan/dns-stuff/crtsh/crt-sh.log | sed 's/<TD>//g' | sed 's/<\/TD>//g' | sed 's/<BR>/\r\n/g' | grep -ivE 'href|search|title' | sed 's/^ *//g' | sed "s/.$domain//g" | sort -u > /opt/osint_scan/dns-stuff/crtsh/crtsh.subdomains
+echo 'curl -s https://crt.sh/\?q\=$domain\&output\=json | jq -r '.[] | [.common_name] + (.name_value | split("\n")) | .[]' | sort -u' | tee -a /opt/osint_scan/logs_and_data/all.log
+curl -s https://crt.sh/\?q\=$domain\&output\=json | jq -r '.[] | [.common_name] + (.name_value | split("\n")) | .[]' | sort -u | tee -a /opt/osint_scan/dns-stuff/crtsh/crtsh.subdomains
+#grep -ai $domain /opt/osint_scan/dns-stuff/crtsh/crt-sh.log | sed 's/<TD>//g' | sed 's/<\/TD>//g' | sed 's/<BR>/\r\n/g' | grep -ivE 'href|search|title' | sed 's/^ *//g' | sort -u > /opt/osint_scan/dns-stuff/crtsh/crtsh.domains
+#grep -ai $domain /opt/osint_scan/dns-stuff/crtsh/crt-sh.log | sed 's/<TD>//g' | sed 's/<\/TD>//g' | sed 's/<BR>/\r\n/g' | grep -ivE 'href|search|title' | sed 's/^ *//g' | sed "s/.$domain//g" | sort -u > /opt/osint_scan/dns-stuff/crtsh/crtsh.subdomains
 }
 
 ########################
