@@ -1,0 +1,150 @@
+## copy and paste this into terminal
+## start with clilog /bin/zsh \\ clilog /bin/bash
+## logs end up at ~/.local/share/cli-logger/commands-*
+
+sudo tee /usr/local/bin/clilog >/dev/null <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG_ROOT="${CLI_LOG_DIR:-$HOME/.local/share/cli-logger}"
+mkdir -p "$LOG_ROOT"
+chmod 700 "$LOG_ROOT"
+
+SESSION_ID="$(date -u '+%Y%m%dT%H%M%SZ')-$$"
+COMMAND_LOG="$LOG_ROOT/commands-$SESSION_ID.tsv"
+
+touch "$COMMAND_LOG"
+chmod 600 "$COMMAND_LOG"
+
+printf 'start_utc\tend_utc\texit_code\tcommand\n' > "$COMMAND_LOG"
+
+echo "[clilog] UTC command log: $COMMAND_LOG"
+echo "[clilog] Type exit to end the logged shell."
+
+export CLI_LOG_COMMAND_FILE="$COMMAND_LOG"
+
+TARGET_SHELL="${1:-${SHELL:-/bin/zsh}}"
+TARGET_NAME="$(basename "$TARGET_SHELL")"
+
+TMPDIR="$(mktemp -d)"
+cleanup() {
+  rm -rf "$TMPDIR"
+}
+trap cleanup EXIT
+
+case "$TARGET_NAME" in
+  zsh)
+    cat > "$TMPDIR/.zshrc" <<'ZSHRC'
+if [[ -r "$HOME/.zshrc" ]]; then
+  source "$HOME/.zshrc"
+fi
+
+autoload -Uz add-zsh-hook
+
+typeset -g __cli_logger_cmd=''
+typeset -g __cli_logger_start_utc=''
+
+__cli_logger_clean() {
+  emulate -L zsh
+  local s="$1"
+  s="${s//$'\t'/ }"
+  s="${s//$'\r'/ }"
+  s="${s//$'\n'/ }"
+  print -r -- "$s"
+}
+
+__cli_logger_preexec() {
+  emulate -L zsh
+  __cli_logger_cmd="$1"
+  __cli_logger_start_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+}
+
+__cli_logger_precmd() {
+  emulate -L zsh
+  local exit_code="$?"
+
+  if [[ -n "$__cli_logger_cmd" && -n "${CLI_LOG_COMMAND_FILE:-}" ]]; then
+    local end_utc clean_cmd
+
+    end_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    clean_cmd="$(__cli_logger_clean "$__cli_logger_cmd")"
+
+    printf '%s\t%s\t%s\t%s\n' \
+      "$__cli_logger_start_utc" \
+      "$end_utc" \
+      "$exit_code" \
+      "$clean_cmd" \
+      >> "$CLI_LOG_COMMAND_FILE"
+
+    __cli_logger_cmd=''
+    __cli_logger_start_utc=''
+  fi
+}
+
+add-zsh-hook preexec __cli_logger_preexec
+add-zsh-hook precmd __cli_logger_precmd
+ZSHRC
+
+    ZDOTDIR="$TMPDIR" "$TARGET_SHELL" -i
+    ;;
+
+  bash)
+    cat > "$TMPDIR/bashrc" <<'BASHRC'
+if [[ -r "$HOME/.bashrc" ]]; then
+  source "$HOME/.bashrc"
+fi
+
+__cli_logger_last_histnum=''
+
+__cli_logger_clean() {
+  local s="$1"
+  s="${s//$'\t'/ }"
+  s="${s//$'\r'/ }"
+  s="${s//$'\n'/ }"
+  printf '%s' "$s"
+}
+
+__cli_logger_log_last_command() {
+  local exit_code="$?"
+  local end_utc entry histnum cmd
+
+  entry="$(HISTTIMEFORMAT= builtin history 1)"
+  entry="${entry#"${entry%%[!0-9]*}"}"
+  histnum="${entry%%[!0-9]*}"
+  cmd="${entry#"$histnum"}"
+  cmd="${cmd#"${cmd%%[![:space:]]*}"}"
+
+  if [[ -n "$histnum" && "$histnum" != "$__cli_logger_last_histnum" && -n "$cmd" && -n "${CLI_LOG_COMMAND_FILE:-}" ]]; then
+    end_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+    printf '%s\t%s\t%s\t%s\n' \
+      "$end_utc" \
+      "$end_utc" \
+      "$exit_code" \
+      "$(__cli_logger_clean "$cmd")" \
+      >> "$CLI_LOG_COMMAND_FILE"
+
+    __cli_logger_last_histnum="$histnum"
+  fi
+
+  return "$exit_code"
+}
+
+case ";${PROMPT_COMMAND:-};" in
+  *";__cli_logger_log_last_command;"*) ;;
+  *) PROMPT_COMMAND="__cli_logger_log_last_command${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;;
+esac
+BASHRC
+
+    "$TARGET_SHELL" --rcfile "$TMPDIR/bashrc" -i
+    ;;
+
+  *)
+    echo "[clilog] Unsupported shell: $TARGET_SHELL" >&2
+    echo "[clilog] Use: clilog /bin/zsh  or  clilog /bin/bash" >&2
+    exit 2
+    ;;
+esac
+EOF
+
+sudo chmod +x /usr/local/bin/clilog
